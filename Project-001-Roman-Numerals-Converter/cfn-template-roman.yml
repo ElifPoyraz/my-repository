@@ -1,14 +1,12 @@
 AWSTemplateFormatVersion: 2010-09-09
-
 Description: |
-  This CloudFormation Template was written for running The Roman Numerals Converter Application aims to convert the given number to the Roman numerals on EC2. Roman numeral converter will be deployed on Amazon Linux 2 (ami-02e136e904f3da870) EC2 Instance with custom security group which allows http connections on port 80 and ssh port 22 from anywhere. Roman numeral converter Website is downloaded from Public Github repository, then deployed on Apache Web Server.
-
+    This CloudFormation Template was written for running The Roman Numerals Converter Application aims to convert the given number to the Roman numerals on EC2. Roman numeral converter will be deployed on Amazon Linux 2 (ami-02e136e904f3da870) EC2 Instance with custom security group which allows http connections on port 80 and ssh port 22 from anywhere. Roman numeral converter Website is downloaded from Public Github repository, then deployed on Apache Web Server.
 Parameters:
   KeyName:
     Description: Enter the name of your Key Pair for SSH connections.
     Type: AWS::EC2::KeyPair::KeyName
     Default: Provide The Key Here...
-
+    ConstraintDescription : Must be the name of an existing EC2 KeyPair.
 Resources:
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -34,26 +32,24 @@ Resources:
       Tags: 
         - Key: Name
           Value: !Sub Name Server of ${AWS::StackName} Stack
-      UserData: 
-        Fn::Base64: |
+      UserData: !Base64 |
           #! /bin/bash
           yum update -y 
           yum install python3 -y
-          pip3 install flask -y 
+          pip3 install flask
           cd /home/ec2-user
           FOLDER="https://raw.githubusercontent.com/ElifPoyraz/my-repository/master/Project-001-Roman-Numerals-Converter"
-          mkdir templates && cd templates
-          wget ${FOLDER}/index.html
-          wget ${FOLDER}/result.html
-          cd ..
           wget ${FOLDER}/app.py
-
+          mkdir templates && cd templates
+          wget ${FOLDER}/templates/index.html
+          wget ${FOLDER}/templates/result.html
+          cd ..
           python3 app.py
           
 
-Outputs:
+Outputs: 
   WebsiteURL:
     Value: !Sub 
       - http://${PublicAddress}
-      - PublicAddress: !GetAtt WebServerHost.PublicDnsName
-    Description: Roman numeral converter URL
+      - PublicAddress: !GetAtt WebServerHost.PublicDnsNam
+    Description: Roman Numerals Converter Application URL
